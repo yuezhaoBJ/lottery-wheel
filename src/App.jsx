@@ -180,7 +180,7 @@ function App() {
   return (
     <div className="lottery-container">
       <div className="flex flex-col items-center space-y-8">
-        <h1 className="text-4xl font-bold text-white text-center mb-8">
+        <h1 className="text-4xl font-bold text-white text-center mb-8 header">
           🎰 小猪兜请抽奖 🎰
         </h1>
         
