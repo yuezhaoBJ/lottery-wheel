@@ -27,7 +27,7 @@
   width: 50%;
   height: 50%;
   transform-origin: 100% 100%;
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  clip-path: polygon(0 0%, 78% 0%, 84% 117%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -151,17 +151,18 @@
 
 .prize-content {
   background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-  padding: 24px;
-  border-radius: 20px;
+  padding: 32px 24px;
+  border-radius: 24px;
   text-align: center;
   color: white;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
   animation: bounceIn 0.5s ease-out;
   width: 100%;
-  max-width: 360px;
+  max-width: 380px;
   box-sizing: border-box;
   max-height: 90vh;
   overflow: auto;
+  position: relative;
 }
 
 @keyframes bounceIn {
@@ -181,11 +182,118 @@
   }
 }
 
-.prize-amount {
-  font-size: 48px;
-  font-weight: bold;
+.prize-amount-wrapper {
   margin: 20px 0;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.prize-amount {
+  font-size: 52px;
+  font-weight: bold;
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(135deg, #fff, #ffe0e0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.amount-text {
+  display: inline-block;
+  animation: slideInLeft 0.6s ease-out;
+}
+
+.payment-icon-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  animation: slideInRight 0.6s ease-out 0.2s both, iconRotateIn 0.8s ease-out 0.3s both;
+}
+
+.payment-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.payment-icon-wrapper:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.wechat-icon svg {
+  filter: drop-shadow(0 2px 8px rgba(7, 193, 96, 0.4));
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+
+.alipay-icon svg {
+  filter: drop-shadow(0 2px 8px rgba(22, 119, 255, 0.4));
+  animation: iconFloat 3s ease-in-out infinite 0.5s;
+}
+
+
+@keyframes slideInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(30px) scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@keyframes iconFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-5px) rotate(2deg);
+  }
+  75% {
+    transform: translateY(5px) rotate(-2deg);
+  }
+}
+
+@keyframes iconRotateIn {
+  0% {
+    opacity: 0;
+    transform: rotate(-180deg) scale(0.3);
+  }
+  60% {
+    transform: rotate(10deg) scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
 }
 
 .red-envelope {

@@ -2,11 +2,46 @@ import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button.jsx'
 import './App.css'
 
+// WeChat Icon Component with enhanced design
+const WeChatIcon = ({ size = 40 }) => (
+  <div className="payment-icon-wrapper wechat-icon">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="wechatGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#07C160" stopOpacity="1"/>
+          <stop offset="100%" stopColor="#06AD56" stopOpacity="1"/>
+        </linearGradient>
+      </defs>
+      <circle cx="12" cy="12" r="11" fill="url(#wechatGradient)" opacity="0.15"/>
+      <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-5.418 2.264-7.763 1.705-1.914 4.24-3.015 7.07-3.015.276 0 .543.027.811.05C17.933 3.487 13.745 2.188 8.691 2.188zm-1.7 6.55c.712 0 1.29.577 1.29 1.29 0 .712-.578 1.29-1.29 1.29a1.293 1.293 0 0 1-1.29-1.29c0-.713.578-1.29 1.29-1.29zm5.16 0c.712 0 1.29.577 1.29 1.29 0 .712-.578 1.29-1.29 1.29a1.293 1.293 0 0 1-1.29-1.29c0-.713.578-1.29 1.29-1.29z" fill="url(#wechatGradient)"/>
+      <path d="M18.785 5.3c-2.83 0-5.365 1.1-7.07 3.015-2.107 2.345-3.121 5.185-2.264 7.763.09.274.27.5.51.656a10.12 10.12 0 0 0 2.837.403c4.8 0 8.691-3.288 8.691-7.342 0-.712-.09-1.403-.27-2.066-.857.054-1.705.27-2.434.57zm-2.264 5.16c.543 0 .99-.447.99-.99s-.447-.99-.99-.99-.99.447-.99.99.447.99.99.99zm3.88 0c.543 0 .99-.447.99-.99s-.447-.99-.99-.99-.99.447-.99.99.447.99.99.99z" fill="url(#wechatGradient)"/>
+    </svg>
+  </div>
+)
+
+// Alipay Icon Component with enhanced design
+const AlipayIcon = ({ size = 40 }) => (
+  <div className="payment-icon-wrapper alipay-icon">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="alipayGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#1677FF" stopOpacity="1"/>
+          <stop offset="100%" stopColor="#0958D9" stopOpacity="1"/>
+        </linearGradient>
+      </defs>
+      <circle cx="12" cy="12" r="11" fill="url(#alipayGradient)" opacity="0.15"/>
+      <path d="M21.714 2.431H2.286A2.286 2.286 0 0 0 0 4.717v14.566a2.286 2.286 0 0 0 2.286 2.286h19.428A2.286 2.286 0 0 0 24 19.283V4.717a2.286 2.286 0 0 0-2.286-2.286zm-7.714 12.857h-1.714v1.714H9.714v-1.714H8v-1.714h1.714V12.43H8v-1.714h1.714V9.002h1.714v1.714h1.714V9.002h1.714v1.714H16v1.714h-1.714v1.144H16v1.714zm-1.714-3.428v1.714h-1.714v-1.714h1.714z" fill="url(#alipayGradient)"/>
+      <path d="M12.286 12.43h1.714v1.714h-1.714V12.43z" fill="url(#alipayGradient)"/>
+    </svg>
+  </div>
+)
+
 function App() {
   const [isSpinning, setIsSpinning] = useState(false)
   const [rotation, setRotation] = useState(0)
   const [showPrize, setShowPrize] = useState(false)
   const [prizeAmount, setPrizeAmount] = useState(0)
+  const [paymentIcon, setPaymentIcon] = useState('wechat') // 'wechat' or 'alipay'
   const [fireworks, setFireworks] = useState([])
   const wheelRef = useRef(null)
   const spinTimeoutRef = useRef(null)
@@ -123,6 +158,8 @@ function App() {
           setRotation(targetRotation)
           setTimeout(() => {
             setPrizeAmount(selectedPrize.amount-1?selectedPrize.amount-1:10)
+            // Randomly select payment icon
+            setPaymentIcon(Math.random() > 0.5 ? 'wechat' : 'alipay')
             setShowPrize(true)
             createFireworks()
           }, 300)
@@ -253,7 +290,18 @@ function App() {
           <div className="prize-content" onClick={(e) => e.stopPropagation()}>
             <div className="red-envelope">🧧</div>
             <h2 className="text-2xl font-bold mb-4">恭喜获得本周奖励</h2>
-            <div className="prize-amount">{prizeAmount}元！</div>
+            <div className="prize-amount-wrapper">
+              <div className="prize-amount flex items-center justify-center gap-3">
+                <span className="amount-text">{prizeAmount}元</span>
+                <span className="payment-icon-container">
+                  {paymentIcon === 'wechat' ? (
+                    <WeChatIcon size={40} />
+                  ) : (
+                    <AlipayIcon size={40} />
+                  )}
+                </span>
+              </div>
+            </div>
             <p className="text-lg mb-6">下周要继续努力哦！</p>
             <Button 
               onClick={closePrizeModal}
