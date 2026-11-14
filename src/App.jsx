@@ -48,19 +48,19 @@ function App() {
   const animationRef = useRef(null)
   const isSpinningRef = useRef(false)
 
-  // 奖项配置：10元权重512，其后依次减半（9=256…1=1）
+  // 奖项配置：10元50%，1-9元平分剩余50%（各约5.56%）
   // 颜色：10元起红橙黄绿青蓝紫，再接粉、深紫、靛蓝
   const prizes = [
-    { amount: 1, probability: 1,   color: '#283593' }, // 靛蓝
-    { amount: 2, probability: 2,   color: '#6A1B9A' }, // 深紫
-    { amount: 3, probability: 4,   color: '#D81B60' }, // 粉
-    { amount: 4, probability: 8,   color: '#8E24AA' }, // 紫
-    { amount: 5, probability: 16,  color: '#1E88E5' }, // 蓝
-    { amount: 6, probability: 32,  color: '#00ACC1' }, // 青
-    { amount: 7, probability: 64,  color: '#43A047' }, // 绿
-    { amount: 8, probability: 128, color: '#F9A825' }, // 黄
-    { amount: 9, probability: 256, color: '#FB8C00' }, // 橙
-    { amount: 10, probability: 512, color: '#E53935' } // 红
+    { amount: 1, probability: 1, color: '#283593' }, // 靛蓝
+    { amount: 2, probability: 1, color: '#6A1B9A' }, // 深紫
+    { amount: 3, probability: 1, color: '#D81B60' }, // 粉
+    { amount: 4, probability: 1, color: '#8E24AA' }, // 紫
+    { amount: 5, probability: 1, color: '#1E88E5' }, // 蓝
+    { amount: 6, probability: 1, color: '#00ACC1' }, // 青
+    { amount: 7, probability: 1, color: '#43A047' }, // 绿
+    { amount: 8, probability: 1, color: '#F9A825' }, // 黄
+    { amount: 9, probability: 1, color: '#FB8C00' }, // 橙
+    { amount: 10, probability: 9, color: '#E53935' } // 红
   ]
 
   const totalProbability = prizes.reduce((sum, prize) => sum + prize.probability, 0)
