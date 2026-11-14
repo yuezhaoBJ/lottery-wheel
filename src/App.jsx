@@ -48,23 +48,51 @@ function App() {
   const animationRef = useRef(null)
   const isSpinningRef = useRef(false)
 
-  // 奖项配置：1-10元，概率分别是10/55到1/55
+  // 奖项配置：10元权重512，其后依次减半（9=256…1=1）
+  // 颜色：10元起红橙黄绿青蓝紫，再接粉、深紫、靛蓝
   const prizes = [
-    { amount: 1, probability: 10, color: '#6befff' }, // 浅青蓝
-    { amount: 2, probability: 9,  color: '#4ecdc4' }, // 青绿色
-    { amount: 3, probability: 8,  color: '#45b7d1' }, // 蓝绿色
-    { amount: 4, probability: 7,  color: '#96ceb4' }, // 浅绿
-    { amount: 5, probability: 6,  color: '#ffe066' }, // 浅黄
-    { amount: 6, probability: 5,  color: '#ff9ff3' }, // 粉色
-    { amount: 7, probability: 4,  color: '#ff8c8c' }, // 浅红
-    { amount: 8, probability: 3,  color: '#ff6b6b' }, // 红色
-    { amount: 9, probability: 2,  color: '#ff4d4d' }, // 略深红
-    { amount: 10, probability: 1, color: '#ff3333' }  // 不太深的红
+    { amount: 1, probability: 1,   color: '#283593' }, // 靛蓝
+    { amount: 2, probability: 2,   color: '#6A1B9A' }, // 深紫
+    { amount: 3, probability: 4,   color: '#D81B60' }, // 粉
+    { amount: 4, probability: 8,   color: '#8E24AA' }, // 紫
+    { amount: 5, probability: 16,  color: '#1E88E5' }, // 蓝
+    { amount: 6, probability: 32,  color: '#00ACC1' }, // 青
+    { amount: 7, probability: 64,  color: '#43A047' }, // 绿
+    { amount: 8, probability: 128, color: '#F9A825' }, // 黄
+    { amount: 9, probability: 256, color: '#FB8C00' }, // 橙
+    { amount: 10, probability: 512, color: '#E53935' } // 红
   ]
+
+  const totalProbability = prizes.reduce((sum, prize) => sum + prize.probability, 0)
+
+  // 按概率计算每个扇区的起止角度（从12点钟顺时针）
+  let cumulativeAngle = 0
+  const segments = prizes.map((prize) => {
+    const sweep = (prize.probability / totalProbability) * 360
+    const startAngle = cumulativeAngle
+    const endAngle = cumulativeAngle + sweep
+    const midAngle = startAngle + sweep / 2
+    cumulativeAngle = endAngle
+    return { ...prize, startAngle, endAngle, midAngle, sweep }
+  })
+
+  const polarToCartesian = (cx, cy, r, angleDeg) => {
+    const rad = ((angleDeg - 90) * Math.PI) / 180
+    return {
+      x: cx + r * Math.cos(rad),
+      y: cy + r * Math.sin(rad),
+    }
+  }
+
+  const describeSegment = (cx, cy, r, startAngle, endAngle) => {
+    const start = polarToCartesian(cx, cy, r, startAngle)
+    const end = polarToCartesian(cx, cy, r, endAngle)
+    const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0
+    return `M ${cx} ${cy} L ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 1 ${end.x} ${end.y} Z`
+  }
 
   // 根据概率选择奖项
   const selectPrize = () => {
-    const totalProbability = prizes.reduce((sum, prize) => sum + prize.probability, 0)
     const random = Math.random() * totalProbability
     let currentSum = 0
     
@@ -112,28 +140,20 @@ function App() {
       
       // 选择奖项
       const selectedPrizeIndex = selectPrize()
-      const selectedPrize = prizes[selectedPrizeIndex]
+      const selectedPrize = segments[selectedPrizeIndex]
       
-      // 计算最终角度
-      // 指针在12点钟方向（0度），需要让选中的扇形区域指向指针
-      const segmentAngle = 360 / prizes.length
-      // 计算选中扇形的中心角度（相对于12点钟方向）
-      const segmentCenterAngle = selectedPrizeIndex * segmentAngle + segmentAngle / 2
-      
-      // 由于指针在顶部，我们需要让转盘旋转，使得选中的扇形中心指向指针
-      // 转盘需要逆时针旋转，让扇形中心对准指针
-      // 调整角度计算，确保指针指向正确的扇形
-      const targetAngle = 360 - segmentCenterAngle + 90 // 加上90度偏移来调整指针位置
+      // 指针在12点钟方向，让选中扇区的中心对准指针
+      const targetAngle = (360 - selectedPrize.midAngle) % 360
       
       // 计算当前角度（取模360）
-      const currentAngle = rotation % 360
+      const currentAngle = ((rotation % 360) + 360) % 360
       
-      // 计算需要转动的角度，确保至少转3圈
+      // 计算需要转动的角度，至少再转1圈
       let angleDiff = targetAngle - currentAngle
       if (angleDiff <= 0) {
         angleDiff += 360
       }
-      const finalRotation = rotation + (360 * 1) + angleDiff
+      const finalRotation = rotation + 360 + angleDiff
       
       // 平滑减速动画
       let startRotation = rotation
@@ -157,7 +177,7 @@ function App() {
           // 停止并显示结果
           setRotation(targetRotation)
           setTimeout(() => {
-            setPrizeAmount(selectedPrize.amount-1?selectedPrize.amount-1:10)
+            setPrizeAmount(selectedPrize.amount)
             // Randomly select payment icon
             setPaymentIcon(Math.random() > 0.5 ? 'wechat' : 'alipay')
             setShowPrize(true)
@@ -225,29 +245,40 @@ function App() {
           {/* 指针 */}
           <div className="wheel-pointer"></div>
           
-          {/* 转盘 */}
+          {/* 转盘：扇区大小按概率比例 */}
           <div 
             ref={wheelRef}
             className="lottery-wheel"
             style={{ transform: `rotate(${rotation}deg)` }}
           >
-            {prizes.map((prize, index) => {
-              const angle = (360 / prizes.length) * index
-              return (
-                <div
-                  key={index}
-                  className="wheel-segment"
-                  style={{
-                    backgroundColor: prize.color,
-                    transform: `rotate(${angle}deg)`,
-                  }}
-                >
-                  <div>
-                    {prize.amount}元
-                  </div>
-                </div>
-              )
-            })}
+            <svg viewBox="0 0 300 300" className="wheel-svg">
+              {segments.map((segment, index) => {
+                const labelPos = polarToCartesian(150, 150, 105, segment.midAngle)
+                const fontSize = segment.sweep >= 40 ? 16 : segment.sweep >= 20 ? 13 : 11
+                return (
+                  <g key={index}>
+                    <path
+                      d={describeSegment(150, 150, 150, segment.startAngle, segment.endAngle)}
+                      fill={segment.color}
+                      stroke="#fff"
+                      strokeWidth="1.5"
+                    />
+                    <text
+                      x={labelPos.x}
+                      y={labelPos.y}
+                      fill="#fff"
+                      fontSize={fontSize}
+                      fontWeight="bold"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)', pointerEvents: 'none' }}
+                    >
+                      {segment.amount}元
+                    </text>
+                  </g>
+                )
+              })}
+            </svg>
           </div>
           
           {/* 中心按钮 */}
